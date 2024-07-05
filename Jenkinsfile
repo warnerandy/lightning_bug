@@ -1,7 +1,9 @@
 properties([pipelineTriggers([githubPush()])])
 
 pipeline {
-  agent Worker-1
+  agent {
+    label 'Worker-1'
+  }
   stages {
     stage('Clone repository') {
         /* Let's make sure we have the repository cloned to our workspace */
