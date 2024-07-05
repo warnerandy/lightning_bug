@@ -18,7 +18,9 @@ pipeline {
           sh """ 
 whoami
 """
-        docker.build("lightning_bug/lightning_bug")
+        script {
+          docker.build("lightning_bug/lightning_bug")
+        }
          }
     }
   }
