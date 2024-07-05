@@ -7,8 +7,9 @@ pipeline {
   stages {
     stage('Clone repository') {
         /* Let's make sure we have the repository cloned to our workspace */
-
-        checkout scm
+        steps {
+          checkout scm
+        }
     }
 
     stage('Build image') {
@@ -21,7 +22,7 @@ whoami
         script {
           docker.build("lightning_bug/lightning_bug")
         }
-         }
+      }
     }
   }
 }
