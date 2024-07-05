@@ -34,7 +34,7 @@ config :esbuild,
     args:
       ~w(js/app.jsx --bundle --target=esnext --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
-    env: %{"NODE_PATH" => "#{Path.expand("../deps", __DIR__)}:#{Path.expand("../assets/node_modules", __DIR__)}"}
+    env: %{"NODE_PATH" => "#{Path.expand("../deps", __DIR__)}:#{Path.expand("../node_modules", __DIR__)}"}
   ]
 
 # Configure tailwind (the version is required)
