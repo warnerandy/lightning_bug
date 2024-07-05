@@ -9,7 +9,7 @@ pipeline {
       /* Let's make sure we have the repository cloned to our workspace */
       steps {
         checkout scm
-        sh "yarn config set -- modules-folder ./assets/node_modules"
+        sh "yarn config set -- modules-folder /assets/node_modules"
         sh "yarn install"
       }
     }
