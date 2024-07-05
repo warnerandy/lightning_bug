@@ -25,6 +25,7 @@ defmodule LightningBugWeb.Router do
     pipe_through :api
     get "/load", ApiController, :load
     get "/services", ApiController, :get
+    get "/errors", ApiController, :errors
     post "/services/set", ApiController, :set_service
     post "/set", ApiController, :set
     post "/set/spotlight", ApiController, :set_spotlight

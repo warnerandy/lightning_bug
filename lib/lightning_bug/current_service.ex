@@ -14,6 +14,10 @@ defmodule LightningBug.CurrentService do
 		GenServer.cast(__MODULE__, {:set, service})
 	end
 
+	def set_errors(errors) do
+		GenServer.cast(__MODULE__, {:set_errors, errors})
+	end
+
 	def get() do
 		GenServer.call(__MODULE__, :get)
 	end
@@ -21,6 +25,12 @@ defmodule LightningBug.CurrentService do
 	@impl true
 	def handle_cast({:set, service}, _state) do
 		{:noreply, service}
+	end
+
+	@impl true
+	def handle_cast({:set_errors, errors}, state) do
+		new_state = Map.put(state, :errors, errors)
+		{:noreply, new_state}
 	end
 
 	@impl true

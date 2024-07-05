@@ -9,6 +9,14 @@ defmodule LightningBugWeb.ApiController do
     render(conn, :index, servers: servers)
   end
 
+   def errors(conn, _params) do
+    service = LightningBug.CurrentService.get()
+    error_list = Map.get(service, :errors, [])
+
+    IO.inspect(error_list)
+    render(conn, :index, errors: error_list)
+  end
+
   def load(conn, _params) do
     service = LightningBug.CurrentService.get()
     ip = Tuple.to_list(service.ip)

@@ -43,6 +43,8 @@ brightness = .3
 customPixels = []
 chase = None
 
+ERRORS = []
+
 def load():
     with open("/lights.txt","r") as fp:
         try:
@@ -82,7 +84,6 @@ pixels = neopixel.NeoPixel(
     PIXEL_PIN, num_pixels, brightness=brightness, auto_write=False, pixel_order=ORDER
 )
 if method == "rotate" and speed != 0: 
-    print(speed)
     chase = CustomColorPatternFill(pixels, speed=speed, size=size, colors=colors)
 
 server = Server(pool, "/static", debug=True)
@@ -90,6 +91,10 @@ server = Server(pool, "/static", debug=True)
 @server.route("/")
 def base(request: Request):
    return JSONResponse(request, load())
+
+@server.route("/errors")
+def errorLogs(request: Request):
+   return JSONResponse(request, json.loads(ERRORS))
 
 @server.route("/update", POST)
 def update(request: Request):
@@ -124,7 +129,7 @@ def update(request: Request):
         
         save(jsonRequest)
     except Exception as e:
-        print(e)
+        ERRORS.append(e)
     return JSONResponse(request, {"test","again"})
 
 # Start the server.
@@ -137,9 +142,12 @@ def setPixels():
         pixels[idx] = pixel
     
 def save(pixelObj):
-    with open("/lights.txt", "w") as fp:
-        fp.write(json.dumps(pixelObj))
-        fp.flush()
+    try:
+        with open("/lights.txt", "w") as fp:
+            fp.write(json.dumps(pixelObj))
+            fp.flush()
+    except Exception as error:
+            ERRORS.append(e)
 
 while True:
     try:
@@ -147,7 +155,7 @@ while True:
             chase.animate()
         elif method == "spotlight":
             setPixels()
-            pizels.show()
+            pixels.show()
         elif method == "clear":
             pixels.fill(BLACK)
         mdns_ticks += 1
@@ -160,13 +168,13 @@ while True:
         try:
             pool_result = server.poll()
         except Exception as error:
-            print(error)
+            ERRORS.append(error)
             continue
         # time.sleep(.03)
         # If you want you can stop the server by calling server.stop() anywhere in your code
     except OSError as error:
-        print(error)
-        print(chase)
+        ERRORS.append(e)
+        microcontroller.reset()
         continue
 
 

@@ -1,4 +1,4 @@
-import React, {StrictMode, useState, useRef, useEffect} from 'react';
+import React, {Fragment, StrictMode, useState, useRef, useEffect} from 'react';
 import SegmentList from './SegmentList';
 import ServiceList from './ServiceList';
 import Light from "./Light";
@@ -35,6 +35,7 @@ export default App = (props) => {
 	useEffect(() => {
 		loadColors();
 		loadPatterns();
+		loadLightSettings();
 	},[])
 	let tFormatted = time
 	if (time) {
@@ -97,6 +98,7 @@ export default App = (props) => {
 			newLights = Array(parseInt(tMax)).fill({color:'#FDF4DC', isOn:true})
 			pixels.forEach( (px, idx) => idx < newLights.length ? newLights[idx] = px : '' )
 			setPixels(newLights)
+			saveSettings({max: tMax, speed: speed, brightness: brightness})
 		}
 	}
 
@@ -155,14 +157,25 @@ export default App = (props) => {
 		toast.success("Colors Saved")
 	}
 
+	const loadLightSettings = () => {
+		const settings = JSON.parse(localStorage.getItem("settings")) || [];
+		toast.success("Settings Loaded")
+		if (settings) {
+			setBrightness(settings.brightness)
+			setMax(settings.max)
+			setSpeed(settings.speed)
+		}
+	}	
+
 	const loadColors = () => {
 		const colors = JSON.parse(localStorage.getItem("colors")) || [];
 		toast.success("Colors Loaded")
 		setColors(colors)
 	}	
 
-	const savePatterns = () => {
-		localStorage.setItem("patterns", JSON.stringify(patterns));
+	const savePatterns = (newPatterns) => {
+		newPatterns = newPatterns || patterns
+		localStorage.setItem("patterns", JSON.stringify(newPatterns));
 		toast.success("Patterns Saved")
 	}
 
@@ -170,6 +183,11 @@ export default App = (props) => {
 		const loadedPatterns = JSON.parse(localStorage.getItem("patterns")) || [];
 		setPatterns(loadedPatterns)
 		toast.success("Patterns Loaded")
+	}
+
+	const saveSettings = (newSettings) => {
+		localStorage.setItem("settings", JSON.stringify(newSettings));
+		toast.success("Settings Saved")
 	}
 
 
@@ -206,6 +224,12 @@ export default App = (props) => {
 
 	const allWhite = () => {
 		setPixels(pixels.map(px => Object.assign({},px,{color:"#FDF4DC"})))
+	}
+
+	const removePattern = (patternName) => {
+		let newPatterns = patterns.filter(pattern => pattern.name != patternName)
+		setPatterns(newPatterns)
+		savePatterns(newPatterns)
 	}
 
 	const stop = () => setSpeed(0)
@@ -260,24 +284,33 @@ export default App = (props) => {
 				<button onClick={savePatterns}><FontAwesomeIcon icon={faFloppyDisk} /></button>
 				{/*<button onClick={loadPatterns}><FontAwesomeIcon icon={faUpload} /></button>*/}
 			</div>
-			<PatternList patterns={patterns} setActive={setActivePattern} add={addPattern} activeIdx={activePattern} />
-			<div className="form-group">
-				<label>Name</label>
-				<input type="text" placeholder="Pattern Name" value={currentPattern.name} onChange={e => updateCurrentPattern('name', e.target.value)} />
-			</div>
-			<div className="form-group">
-				<label>Lights per group</label>
-				<input type="number" placeholder="lights per color" min="0" value={currentPattern.size} onChange={e => updateCurrentPattern('size', e.target.value)} />
-			</div>
-			<button onClick={addPatternColor}>Add Color</button>
-			<ol className="color-list">
-				{currentPattern.colors.map((color,idx) => {
-					return 	(<li key={idx}>
-						<ColorItem ident={`pattern:${idx}`} color={color} update={updatePatternColor} remove={removePatternColor} showDetails={showDetails == `pattern:${idx}`} setShowDetails={setShowDetails} colors={colors}/>
-					</li>)
-				})
-			}
-			</ol>
+			<PatternList 
+				patterns={patterns} 
+				setActive={setActivePattern} 
+				add={addPattern} 
+				activeIdx={activePattern}
+				removePattern={removePattern} />
+			{currentPattern?
+				<Fragment>
+				<div className="form-group">
+					<label>Name</label>
+					<input type="text" placeholder="Pattern Name" value={currentPattern.name} onChange={e => updateCurrentPattern('name', e.target.value)} />
+				</div>
+				<div className="form-group">
+					<label>Lights per group</label>
+					<input type="number" placeholder="lights per color" min="0" value={currentPattern.size} onChange={e => updateCurrentPattern('size', e.target.value)} />
+				</div>
+				<button onClick={addPatternColor}>Add Color</button>
+				<ol className="color-list">
+					{currentPattern.colors.map((color,idx) => {
+						return 	(<li key={idx}>
+							<ColorItem ident={`pattern:${idx}`} color={color} update={updatePatternColor} remove={removePatternColor} showDetails={showDetails == `pattern:${idx}`} setShowDetails={setShowDetails} colors={colors}/>
+						</li>)
+					})
+				}
+				</ol>
+				</Fragment>
+			:''}
 			<div className="actions">
 				<button onClick={setPattern}>Set Pattern</button>
 			</div>

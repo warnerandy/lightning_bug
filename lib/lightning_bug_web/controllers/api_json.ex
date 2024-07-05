@@ -29,12 +29,14 @@ defmodule LightningBugWeb.ApiJSON do
   def ok(_params) do
     %{success: "ok"}
   end
-  @doc """
-  Renders a single url.
-  """
-  # def show(%{server: server}) do
-  #   %{data: data(server)}
-  # end
+
+  def errors(%{errors: errors}) when errors != nil do
+    %{data: for(err <- errors, do: error(err))}
+  end
+
+  defp error(err) do
+    err
+  end
 
   defp data(%Device{} = device) do
     %{
